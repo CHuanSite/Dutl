@@ -1,7 +1,6 @@
-import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+import numpy as np
 
 def sizeExtractor(datasets):
     """
@@ -106,10 +105,8 @@ class projNet(nn.Module):
 def maximumMeanDiscrepancy(embed_data_1,
                            embed_data_2,
                            sigma = 10000):
-
-    r'''
+    '''
     Compute the maximumMeanDiscrepancy between two low dimensional embeddings
-
     '''
 
     n1 = embed_data_1.shape[0]
@@ -133,7 +130,7 @@ def mmdLoss(proj_datasets,
             temp_proj_data.append(proj_datasets[data_id])
         for i in range(len(temp_proj_data) - 1):
             for j in range(i, len(temp_proj_data)):
-                temp_loss += maximumMeanDiscrepancy(temp_proj_data[i], temp_proj_data[j], sigma = 10000)
+                temp_loss += maximumMeanDiscrepancy(temp_proj_data[i], temp_proj_data[j], sigma = sigma)
         temp_loss = temp_loss / len(temp_proj_data)
         out_loss += temp_loss
 

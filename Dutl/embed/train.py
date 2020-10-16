@@ -17,7 +17,6 @@ def trainEmbed(datasets,
     embed_network.train()
     proj_network.train()
 
-
     '''
     DataLoader
     '''
