@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import numpy as np
 
 def sizeExtractor(datasets):
     """
@@ -15,12 +14,13 @@ def sizeExtractor(datasets):
     return p, n_list
 
 class embedNet(nn.Module):
-    '''
-    Create a embedding network for the datasets
-    '''
+    # '''
+    # Create a embedding network for the datasets
+    # '''
 
-    def __init__(self, p, n_list):
+    def __init__(self, p:int, n_list:list):
         super(embedNet, self).__init__()
+        pass
         self.embed = nn.Sequential(
             nn.Linear(p, 256, bias = False),
             nn.ReLU(),
@@ -28,9 +28,8 @@ class embedNet(nn.Module):
             nn.ReLU()
         )
         self.normalize = []
-        for i in range(n_list - 1):
+        for i in range(len(n_list) - 1):
             self.normalize.append(nn.BatchNorm1d(p))
-
 
     def forward(self, datasets):
         embed_datasets = []
@@ -44,10 +43,11 @@ class embedNet(nn.Module):
 
         return embed_datasets
 
-    '''
-    Embed single dataset
-    '''
-    def c(self, dataset, data_index):
+    def embedSingleData(self, dataset, data_index):
+        '''
+        Embed single dataset
+        '''
+
         temp_embed = dataset
         if data_index != 1:
             temp_embed = self.normalize[data_index - 2](temp_embed)
@@ -56,24 +56,26 @@ class embedNet(nn.Module):
 
         return temp_embed
 
-
-
-
 class projNet(nn.Module):
-
     '''
     Project the embedded layer to low dimension space
-
     '''
 
     def __init__(self, group_structure):
+        '''
+        Initialize the project network
+        '''
         super(projNet, self).__init__()
         self.group_structure = [[group_id - 1 for group_id in group] for group in group_structure]
         self.proj = []
         for i in range(len(group_structure)):
             self.proj.append(nn.Linear(64, 2, bias = False))
+        self.proj = nn.Sequential(*self.proj)
 
     def forward(self, embed_datasets):
+        '''
+        Forward the network
+        '''
         proj_datasets = []
         for index, group in enumerate(self.group_structure):
             proj_datasets.append([])
@@ -82,18 +84,21 @@ class projNet(nn.Module):
 
         return proj_datasets
 
-    '''
-    Project single dataset based on embed result
-    '''
-
     def projectSingleData(self, embed_data, group_index):
+
+        '''
+        Project single dataset based on embed result
+        '''
+
         return self.proj[group_index - 1](embed_data)
 
-    '''
-    Condition on the orthogonal of the projection weight
-    '''
 
     def weightOrthogonal(self):
+
+        '''
+        Condition on the orthogonal of the projection weight
+        '''
+
         weight_concatenate = torch.Tensor()
         for layer in self.proj:
             weight_concatenate = torch.cat((weight_concatenate, layer.weight), 1)
@@ -102,32 +107,30 @@ class projNet(nn.Module):
 
         return penalty
 
-def maximumMeanDiscrepancy(embed_data_1,
-                           embed_data_2,
+def maximumMeanDiscrepancy(proj_data_1,
+                           proj_data_2,
                            sigma = 10000):
     '''
     Compute the maximumMeanDiscrepancy between two low dimensional embeddings
     '''
 
-    n1 = embed_data_1.shape[0]
-    n2 = embed_data_2.shape[1]
+    n1 = proj_data_1.shape[0]
+    n2 = proj_data_2.shape[1]
 
-    diff_1 = embed_data_1.unsequeeze(1) - embed_data_1
-    diff_2 = embed_data_2.unsequeeze(1) - embed_data_2
-    diff_12 = embed_data_1.unsequeeze(1) - embed_data_2
+    diff_1 = proj_data_1.unsqueeze(1) - proj_data_1
+    diff_2 = proj_data_2.unsqueeze(1) - proj_data_2
+    diff_12 = proj_data_1.unsqueeze(1) - proj_data_2
 
     return torch.sum(torch.exp(-1 * torch.sum(diff_1**2, 2) / sigma)) / (n1**2) + torch.sum(torch.exp(-1 * torch.sum(diff_2**2,2) / sigma)) / (n2**2) - 2 * torch.sum(torch.exp(-1 * torch.sum(diff_12**2, 2) / sigma)) / (n1 * n2)
 
-def mmdLoss(proj_datasets,
-            group_structure,
-            sigma = 10000):
+def mmdLoss(proj_datasets, group_structure, sigma = 10000):
 
     out_loss = 0
-    for group in group_structure:
+    for index, group in enumerate(group_structure):
         temp_proj_data = []
         temp_loss = 0
-        for data_id in group:
-            temp_proj_data.append(proj_datasets[data_id])
+        for t in range(len(group)):
+            temp_proj_data.append(proj_datasets[index][t])
         for i in range(len(temp_proj_data) - 1):
             for j in range(i, len(temp_proj_data)):
                 temp_loss += maximumMeanDiscrepancy(temp_proj_data[i], temp_proj_data[j], sigma = sigma)

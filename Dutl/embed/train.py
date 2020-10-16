@@ -36,7 +36,7 @@ def trainEmbed(datasets,
     for epoch in range(epoch_total):
 
         running_loss = 0
-        for i in range(30):
+        for i in range(1):
             train_datasets = []
             for index, dataset in enumerate(datasets):
                 train_datasets.append(next(iter(dataloader_list[index])))
@@ -53,8 +53,7 @@ def trainEmbed(datasets,
             running_loss += loss.item()
 
         total_loss.append(running_loss)
-
-
+        print(epoch)
 
     return embed_network, proj_network, total_loss
 

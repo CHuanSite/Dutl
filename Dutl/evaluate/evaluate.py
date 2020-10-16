@@ -1,8 +1,5 @@
-import torch
-import torch.nn as nn
 import numpy as np
 from scipy.spatial import distance_matrix
-import Dutl.visualize as visualize
 
 def probDistance(x, sigma_est = True):
     '''
@@ -56,12 +53,12 @@ class metricEmbed(object):
     Class to compute the metrics for the embedding results
     '''
 
-    def __init__(self, datasets, group_structure, embed_network, proj_network):
+    def __init__(self, datasets, group_structure, embed_network, proj_network, visulization_embed):
         self.datasets = datasets
         self.group_structure = group_structure
         self.embed_network = embed_network
         self.proj_network = proj_network
-        self.visulization_embed = visualize.visualizationEmbed(embed_network, proj_network, datasets, group_structure)
+        self.visulization_embed = visulization_embed
 
 
     def geneMetric(self, geneName, group):
