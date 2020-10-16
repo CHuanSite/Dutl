@@ -1,8 +1,11 @@
 # Dutl v0.0.1
 
+## About
 Dutl is a python package to embed and visualize multiple linked transcriptomics experiments with deep unsupervised transfer learning
 
 ***DULT*** is developed in Python, and PyTorch serves as the engine of the deep learning.
+
+## Features
 
 It has the following features:  
 
@@ -29,6 +32,10 @@ To construct the virtual environment, please refer to the following steps:
 1. Install Conda, [Click me to install Conda](https://docs.conda.io/en/latest/);
 
 1. To install the Virtural environment with conda, [Clike me to install virtual environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html);
+
+## Source
+
+The latest developer version is available in the [Github repository](https://github.com/CHuanSite/Dutl).
 
 ## Contact
 
